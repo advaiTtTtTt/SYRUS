@@ -1,0 +1,23 @@
+# Environment
+.env
+__pycache__/
+*.pyc
+*.pyo
+
+# Data directories
+uploads/
+exports/
+db/*.db
+models/*.pt
+
+# IDE
+.vscode/
+.idea/
+
+# Node
+node_modules/
+dist/
+
+# OS
+.DS_Store
+Thumbs.db

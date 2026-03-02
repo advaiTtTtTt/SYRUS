@@ -1,0 +1,35 @@
+# Core
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+python-multipart==0.0.18
+pydantic==2.10.4
+pydantic-settings==2.7.1
+
+# CAD Engine
+cadquery==2.4.0
+OCP==7.7.2.2
+
+# Mesh processing & export
+trimesh==4.5.3
+numpy==1.26.4
+numpy-stl==3.1.2
+
+# Image parsing (CV pipeline)
+ultralytics==8.3.50
+opencv-python-headless==4.10.0.84
+segment-anything-py==1.0
+torch==2.5.1
+torchvision==0.20.1
+pillow==11.0.0
+
+# Database
+aiosqlite==0.20.0
+
+# Utilities
+python-dotenv==1.0.1
+loguru==0.7.3
+uuid6==2024.7.10
+
+# Testing
+pytest==8.3.4
+pytest-asyncio==0.24.0

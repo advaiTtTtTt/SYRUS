@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+  backend:
+    build: ./backend
+    container_name: syrus-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/uploads:/app/uploads
+      - ./backend/exports:/app/exports
+      - ./backend/models:/app/models
+      - ./backend/db:/app/db
+    environment:
+      - SYRUS_CORS_ORIGINS=["http://localhost:5173","http://localhost:3000","http://localhost:80"]
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: syrus-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
