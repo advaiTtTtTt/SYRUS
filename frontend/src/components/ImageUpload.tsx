@@ -73,6 +73,9 @@ export default function ImageUpload() {
   return (
     <div
       className={`upload-dropzone ${dragActive ? "upload-dropzone--active" : ""}`}
+      role="button"
+      tabIndex={0}
+      aria-label="Upload jewelry image — click or drag and drop"
       onDragOver={(e) => {
         e.preventDefault();
         setDragActive(true);
@@ -80,22 +83,38 @@ export default function ImageUpload() {
       onDragLeave={() => setDragActive(false)}
       onDrop={onDrop}
       onClick={() => inputRef.current?.click()}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          inputRef.current?.click();
+        }
+      }}
     >
       <input
         ref={inputRef}
         type="file"
         accept="image/*"
         hidden
+        aria-hidden="true"
         onChange={(e) => {
           const f = e.target.files?.[0];
           if (f) handleFile(f);
+          // Reset so re-uploading the same file works
+          e.target.value = "";
         }}
       />
       {isParsing ? (
-        <span className="upload-status">Analyzing image...</span>
+        <span className="upload-status">
+          <span className="spinner" style={{ marginRight: 8 }} />
+          Analyzing image...
+        </span>
+      ) : parseResult ? (
+        <span className="upload-label" style={{ color: "#4ade80" }}>
+          ✓ Image analyzed — drop another to replace
+        </span>
       ) : (
         <>
-          <span className="upload-icon">📷</span>
+          <span className="upload-icon" aria-hidden="true">📷</span>
           <span className="upload-label">
             Drop a jewelry image or click to upload
           </span>

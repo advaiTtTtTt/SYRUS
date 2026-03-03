@@ -11,6 +11,16 @@ from pydantic import BaseModel, Field
 from .parametric import ParametricRing
 
 
+class DetectionRegion(BaseModel):
+    """A single detected region with bounding box (normalised 0-1)."""
+
+    label: str = Field(description="Component label, e.g. ring_band, center_stone, prong")
+    confidence: float = Field(ge=0.0, le=1.0, description="Detection confidence 0-1")
+    bbox: tuple[float, float, float, float] = Field(
+        description="Normalised bounding box (x1, y1, x2, y2) in 0-1 range"
+    )
+
+
 class ParseResult(BaseModel):
     """Output of the jewelry image parser."""
 
@@ -27,3 +37,9 @@ class ParseResult(BaseModel):
     stone_confidence: float = Field(default=0.0, ge=0.0, le=1.0)
     setting_confidence: float = Field(default=0.0, ge=0.0, le=1.0)
     symmetry_confidence: float = Field(default=0.0, ge=0.0, le=1.0)
+
+    # Detection regions for bbox overlay (normalised 0-1 coords)
+    detections: list[DetectionRegion] = Field(
+        default_factory=list,
+        description="Detected component bounding boxes for visual overlay",
+    )

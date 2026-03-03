@@ -4,45 +4,10 @@
  * Controls: count, diameter, rows.
  */
 
-import "./Customizer.css";
 import { PARAM_LIMITS } from "../../types/jewelry";
 import type { SideStoneLayout, SideStonePattern } from "../../types/jewelry";
 import { useProjectStore } from "../../store/useProjectStore";
-
-interface SliderProps {
-  label: string;
-  value: number;
-  min: number;
-  max: number;
-  step: number;
-  unit?: string;
-  onChange: (v: number) => void;
-}
-
-function Slider({ label, value, min, max, step, unit = "mm", onChange }: SliderProps) {
-  const id = label.toLowerCase().replace(/\s+/g, "-");
-  return (
-    <div className="slider-row">
-      <div className="label-row">
-        <label htmlFor={id}>{label}</label>
-        <span>
-          {typeof step === "number" && step >= 1 ? value : value.toFixed(1)} {unit}
-        </span>
-      </div>
-      <input
-        id={id}
-        type="range"
-        className="range-slider"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        aria-label={label}
-        onChange={(e) => onChange(parseFloat(e.target.value))}
-      />
-    </div>
-  );
-}
+import Slider from "./Slider";
 
 const PATTERNS: { value: SideStonePattern; label: string }[] = [
   { value: "pave", label: "Pavé" },

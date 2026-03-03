@@ -6,15 +6,25 @@
   justify-content: center;
   border: 2px dashed #555;
   border-radius: 12px;
-  padding: 32px;
+  padding: 16px 24px;
   cursor: pointer;
-  transition: border-color 0.2s;
-  min-height: 160px;
+  transition: border-color 0.2s, background 0.2s;
+  min-height: 64px;
+}
+
+.upload-dropzone:hover {
+  border-color: #a78bfa;
+  background: rgba(167, 139, 250, 0.04);
+}
+
+.upload-dropzone:focus-visible {
+  outline: 2px solid #a78bfa;
+  outline-offset: 2px;
 }
 
 .upload-dropzone--active {
   border-color: #a78bfa;
-  background: rgba(167, 139, 250, 0.05);
+  background: rgba(167, 139, 250, 0.08);
 }
 
 .upload-status {

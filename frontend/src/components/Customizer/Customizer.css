@@ -7,8 +7,21 @@
   background: #111;
   border-radius: 12px;
   overflow-y: auto;
-  max-height: 100%;
+  max-height: 100%;  scrollbar-width: thin;
+  scrollbar-color: #333 transparent;
 }
+
+.customizer-panel::-webkit-scrollbar {
+  width: 5px;
+}
+
+.customizer-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.customizer-panel::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;}
 
 .customizer-panel h3 {
   font-size: 15px;
@@ -42,6 +55,43 @@
 .range-slider {
   width: 100%;
   accent-color: #a78bfa;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #333;
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+
+.range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #a78bfa;
+  border: 2px solid #0f0f0f;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.range-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.range-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #a78bfa;
+  border: 2px solid #0f0f0f;
+  cursor: pointer;
+}
+
+.range-slider::-moz-range-track {
+  background: #333;
+  height: 6px;
+  border-radius: 3px;
 }
 
 /* ── Select / dropdown ────────────────────────────── */
@@ -54,6 +104,22 @@
   color: #e0e0e0;
   font-size: 12px;
   margin-bottom: 12px;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 28px;
+  transition: border-color 0.15s;
+}
+
+.customizer-select:hover {
+  border-color: #666;
+}
+
+.customizer-select:focus {
+  border-color: #a78bfa;
+  outline: none;
 }
 
 /* ── Form group ───────────────────────────────────── */
@@ -86,10 +152,20 @@
   transition: all 0.15s;
 }
 
+.toggle-btn:hover:not(:disabled) {
+  border-color: #a78bfa;
+  background: rgba(167, 139, 250, 0.1);
+}
+
 .toggle-btn--active {
   background: #a78bfa;
   color: #000;
   font-weight: 600;
+  border-color: #a78bfa;
+}
+
+.toggle-btn--active:hover:not(:disabled) {
+  background: #b49dfc;
 }
 
 .toggle-btn--inactive {

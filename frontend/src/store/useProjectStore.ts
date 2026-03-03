@@ -6,6 +6,7 @@
  */
 
 import { create } from "zustand";
+import { temporal } from "zundo";
 import type {
   BudgetEstimate,
   Customization,
@@ -86,7 +87,9 @@ const DEFAULT_CUSTOM: Customization = {
   target_budget: null,
 };
 
-export const useProjectStore = create<ProjectState>((set) => ({
+export const useProjectStore = create<ProjectState>()(
+  temporal(
+  (set) => ({
   projectId: null,
   sourceImage: null,
   parseResult: null,
@@ -149,6 +152,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
         stone_confidence: 0,
         setting_confidence: 0,
         symmetry_confidence: 0,
+        detections: [],
       },
       currentParams: { ...DEFAULT_PARAMS },
       customization: { ...DEFAULT_CUSTOM },
@@ -171,4 +175,13 @@ export const useProjectStore = create<ProjectState>((set) => ({
       isBuilding: false,
       buildError: null,
     }),
-}));
+}),
+  {
+    // Only track param + customization changes for undo/redo (not UI state)
+    partialize: (state) => ({
+      currentParams: state.currentParams,
+      customization: state.customization,
+    }),
+    limit: 50,
+  }
+));

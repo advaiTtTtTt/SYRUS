@@ -55,11 +55,20 @@ function LoadedModel({ url }: { url: string }) {
   const metalColor = METAL_COLORS[customization.metal_type] ?? "#d4af37";
   const gemColor = GEM_COLORS[customization.gemstone_material] ?? "#b9f2ff";
 
+  const clonedScene = useMemo(() => scene.clone(), [scene]);
+
   useEffect(() => {
-    scene.traverse((child) => {
+    const oldMaterials: THREE.Material[] = [];
+
+    clonedScene.traverse((child) => {
       if (child instanceof THREE.Mesh) {
+        // Track old material for disposal
+        if (child.material) {
+          const mats = Array.isArray(child.material) ? child.material : [child.material];
+          oldMaterials.push(...mats);
+        }
+
         if (isStoneNode(child.name)) {
-          // Gem material — transparent, refractive
           child.material = new THREE.MeshPhysicalMaterial({
             color: gemColor,
             transparent: true,
@@ -72,7 +81,6 @@ function LoadedModel({ url }: { url: string }) {
             thickness: 2.0,
           });
         } else {
-          // Metal material
           child.material = new THREE.MeshStandardMaterial({
             color: metalColor,
             metalness: 0.92,
@@ -83,9 +91,13 @@ function LoadedModel({ url }: { url: string }) {
         child.receiveShadow = true;
       }
     });
-  }, [scene, metalColor, gemColor]);
 
-  return <primitive object={scene.clone()} />;
+    return () => {
+      oldMaterials.forEach((m) => m.dispose());
+    };
+  }, [clonedScene, metalColor, gemColor]);
+
+  return <primitive object={clonedScene} />;
 }
 
 /** Parametric fallback ring — interactive 3D preview without CadQuery.

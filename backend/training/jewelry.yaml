@@ -1,0 +1,23 @@
+# SYRUS Jewelry YOLOv8 Dataset Config
+# Classes: ring_band, center_stone, prong, bezel_rim, side_stone, bail, pendant_body, earring_stud
+
+path: ../dataset          # dataset root dir (relative to this file or absolute)
+train: images/train       # train images
+val: images/val           # validation images
+
+# Classes
+names:
+  0: ring_band
+  1: center_stone
+  2: prong
+  3: bezel_rim
+  4: side_stone
+  5: bail
+  6: pendant_body
+  7: earring_stud
+
+# Training notes:
+# - Minimum 50-80 images per class for decent transfer-learning results
+# - ring_band and center_stone are highest priority (most impactful)
+# - Use augmentation: flip, rotate, brightness, scale
+# - Pre-trained base: yolov8n.pt (nano) or yolov8s.pt (small) for speed

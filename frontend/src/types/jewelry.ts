@@ -79,6 +79,13 @@ export interface Customization {
 
 // ── Parse result ───────────────────────────────────────────────
 
+export interface DetectionRegion {
+  label: string;
+  confidence: number;
+  /** Normalised bounding box [x1, y1, x2, y2] in 0-1 range */
+  bbox: [number, number, number, number];
+}
+
 export interface ParseResult {
   params: ParametricRing;
   confidence_score: number;
@@ -86,6 +93,8 @@ export interface ParseResult {
   stone_confidence: number;
   setting_confidence: number;
   symmetry_confidence: number;
+  /** Detected component bounding boxes for visual overlay */
+  detections: DetectionRegion[];
 }
 
 // ── Budget result ──────────────────────────────────────────────

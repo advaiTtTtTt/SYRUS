@@ -78,11 +78,24 @@ export default function BudgetPanel() {
         <input
           style={inputStyle}
           type="number"
+          min="1"
           placeholder="e.g. 50000"
           value={targetBudget}
           onChange={(e) => setTargetBudget(e.target.value)}
         />
-        <button style={btnStyle} onClick={handleAdjust} disabled={loading}>
+        <button
+          style={{
+            ...btnStyle,
+            opacity: loading ? 0.6 : 1,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
+          }}
+          onClick={handleAdjust}
+          disabled={loading}
+        >
+          {loading && <span className="spinner" />}
           {loading ? "Adjusting..." : "Fit to Budget"}
         </button>
       </div>

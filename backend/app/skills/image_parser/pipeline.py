@@ -19,7 +19,7 @@ from pathlib import Path
 
 from app.config import settings
 from app.schemas.parametric import CenterStone, ParametricRing
-from app.schemas.parse_result import ParseResult
+from app.schemas.parse_result import DetectionRegion, ParseResult
 
 from .confidence import compute_confidence
 from .detector import detect_jewelry
@@ -61,7 +61,30 @@ def _make_fallback_result(
         stone_confidence=0.0,
         setting_confidence=0.0,
         symmetry_confidence=0.0,
+        detections=[],
     )
+
+
+def _extract_detection_regions(
+    detections,  # DetectionResult
+    img_h: int,
+    img_w: int,
+) -> list[DetectionRegion]:
+    """Convert raw pixel-space detections to normalised 0-1 DetectionRegion list."""
+    regions: list[DetectionRegion] = []
+    for det in detections.raw_detections:
+        x1, y1, x2, y2 = det.bbox
+        regions.append(DetectionRegion(
+            label=det.label,
+            confidence=round(det.confidence, 3),
+            bbox=(
+                round(x1 / img_w, 4),
+                round(y1 / img_h, 4),
+                round(x2 / img_w, 4),
+                round(y2 / img_h, 4),
+            ),
+        ))
+    return regions
 
 
 def parse_image(image_path: Path) -> ParseResult:
@@ -98,6 +121,10 @@ def parse_image(image_path: Path) -> ParseResult:
     except Exception as exc:
         log.warning("Detection failed: %s", exc)
         return _make_fallback_result(f"Detection error: {exc}")
+
+    # Extract normalised bbox regions for frontend overlay
+    img_h, img_w = img.shape[:2]
+    detection_regions = _extract_detection_regions(detections, img_h, img_w)
 
     # ── 2. Measure ─────────────────────────────────────────────────
     measurements = measure_from_detections(img, detections)
@@ -138,4 +165,5 @@ def parse_image(image_path: Path) -> ParseResult:
         stone_confidence=scores["stone_confidence"],
         setting_confidence=scores["setting_confidence"],
         symmetry_confidence=scores["symmetry_confidence"],
+        detections=detection_regions,
     )

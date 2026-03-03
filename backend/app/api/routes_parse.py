@@ -54,6 +54,7 @@ async def parse_jewelry_image(file: UploadFile = File(...)):
             stone_confidence=0.0,
             setting_confidence=0.0,
             symmetry_confidence=0.0,
+            detections=[],
         )
     except Exception as e:
         raise HTTPException(500, f"Image parsing failed: {e}")
