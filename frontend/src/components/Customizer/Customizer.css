@@ -1,0 +1,104 @@
+/* ── Customizer Panel ──────────────────────────────── */
+.customizer-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 16px;
+  background: #111;
+  border-radius: 12px;
+  overflow-y: auto;
+  max-height: 100%;
+}
+
+.customizer-panel h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+}
+
+/* ── Section headings ─────────────────────────────── */
+.section-heading {
+  font-size: 13px;
+  color: #a78bfa;
+  margin-bottom: 12px;
+}
+
+/* ── Slider rows ──────────────────────────────────── */
+.slider-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.label-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #ccc;
+}
+
+.range-slider {
+  width: 100%;
+  accent-color: #a78bfa;
+}
+
+/* ── Select / dropdown ────────────────────────────── */
+.customizer-select {
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background: #1a1a1a;
+  color: #e0e0e0;
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+
+/* ── Form group ───────────────────────────────────── */
+.form-group {
+  margin-bottom: 12px;
+}
+
+.form-group-sm {
+  margin-bottom: 8px;
+}
+
+.form-label {
+  font-size: 12px;
+  color: #ccc;
+}
+
+/* ── Setting toggle buttons ───────────────────────── */
+.toggle-row {
+  display: flex;
+  gap: 8px;
+}
+
+.toggle-btn {
+  flex: 1;
+  padding: 6px 12px;
+  border: 1px solid #444;
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+
+.toggle-btn--active {
+  background: #a78bfa;
+  color: #000;
+  font-weight: 600;
+}
+
+.toggle-btn--inactive {
+  background: #1a1a1a;
+  color: #888;
+  font-weight: 400;
+}
+
+.toggle-btn--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

@@ -1,5 +1,5 @@
 /**
- * GLB ring model loader and display.
+ * GLB model loader with multi-material support + parametric fallbacks.
  */
 
 import { useGLTF } from "@react-three/drei";
@@ -22,34 +22,68 @@ const GEM_COLORS: Record<string, string> = {
   moissanite: "#f5e6b8",
 };
 
+/** Mesh names containing these tokens get gem material instead of metal. */
+const STONE_TOKENS = ["stone", "gem", "halo_stones", "pave_stones"];
+
+function isStoneNode(name: string): boolean {
+  const lower = name.toLowerCase();
+  return STONE_TOKENS.some((t) => lower.includes(t));
+}
+
 export default function RingModel() {
   const modelUrl = useProjectStore((s) => s.modelUrl);
+  const jewelryType = useProjectStore((s) => s.currentParams.type);
 
-  if (!modelUrl) {
-    return <FallbackRing />;
+  if (modelUrl) {
+    return <LoadedModel url={modelUrl} />;
   }
 
-  return <LoadedModel url={modelUrl} />;
+  // Parametric fallback per type
+  switch (jewelryType) {
+    case "pendant":
+      return <FallbackPendant />;
+    case "earring":
+      return <FallbackEarring />;
+    default:
+      return <FallbackRing />;
+  }
 }
 
 function LoadedModel({ url }: { url: string }) {
   const { scene } = useGLTF(url);
   const customization = useProjectStore((s) => s.customization);
   const metalColor = METAL_COLORS[customization.metal_type] ?? "#d4af37";
+  const gemColor = GEM_COLORS[customization.gemstone_material] ?? "#b9f2ff";
 
   useEffect(() => {
     scene.traverse((child) => {
       if (child instanceof THREE.Mesh) {
-        child.material = new THREE.MeshStandardMaterial({
-          color: metalColor,
-          metalness: 0.92,
-          roughness: 0.12,
-        });
+        if (isStoneNode(child.name)) {
+          // Gem material — transparent, refractive
+          child.material = new THREE.MeshPhysicalMaterial({
+            color: gemColor,
+            transparent: true,
+            opacity: 0.82,
+            roughness: 0.02,
+            metalness: 0.0,
+            clearcoat: 1.0,
+            clearcoatRoughness: 0.03,
+            ior: 2.4,
+            thickness: 2.0,
+          });
+        } else {
+          // Metal material
+          child.material = new THREE.MeshStandardMaterial({
+            color: metalColor,
+            metalness: 0.92,
+            roughness: 0.12,
+          });
+        }
         child.castShadow = true;
         child.receiveShadow = true;
       }
     });
-  }, [scene, metalColor]);
+  }, [scene, metalColor, gemColor]);
 
   return <primitive object={scene.clone()} />;
 }
@@ -186,6 +220,112 @@ function FallbackRing() {
           );
         })}
       </group>
+    </group>
+  );
+}
+
+/** Parametric fallback pendant — disc/oval + bail + stone. */
+function FallbackPendant() {
+  const params = useProjectStore((s) => s.currentParams);
+  const customization = useProjectStore((s) => s.customization);
+  const metalColor = METAL_COLORS[customization.metal_type] ?? "#d4af37";
+  const gemColor = GEM_COLORS[customization.gemstone_material] ?? "#b9f2ff";
+
+  const pp = params.pendant_params;
+  const baseW = pp?.base_width ?? 15;
+  const baseH = pp?.base_height ?? 20;
+  const baseT = pp?.base_thickness ?? 2;
+  const bailD = pp?.bail_diameter ?? 5;
+  const bailT = pp?.bail_thickness ?? 1.5;
+  const isOval = pp?.base_shape === "oval";
+
+  const stone = params.center_stone;
+  const stoneR = stone.diameter / 2;
+
+  // For oval: squash the cylinder on Y axis (base cylinder lies flat, height → thickness)
+  // cylinder args: [radiusTop, radiusBottom, height, radialSegments]
+  // We use the larger of baseW, baseH as the cylinder radius, then scale
+  const baseRadius = baseW / 2;
+  const ovalScaleZ = isOval ? baseH / baseW : 1.0;
+
+  return (
+    <group rotation={[-0.2, 0.15, 0]}>
+      {/* Base plate — circular or oval */}
+      <mesh scale={[1, 1, ovalScaleZ]}>
+        <cylinderGeometry args={[baseRadius, baseRadius, baseT, 48]} />
+        <meshStandardMaterial color={metalColor} metalness={0.92} roughness={0.12} />
+      </mesh>
+
+      {/* Bail loop at top */}
+      <mesh position={[0, baseRadius * ovalScaleZ + bailD / 3, 0]}>
+        <torusGeometry args={[bailD / 2, bailT / 2, 16, 32, Math.PI]} />
+        <meshStandardMaterial color={metalColor} metalness={0.92} roughness={0.12} />
+      </mesh>
+
+      {/* Center stone */}
+      <mesh position={[0, 0, baseT / 2 + stoneR * 0.3]}>
+        <sphereGeometry args={[stoneR * 0.7, 48, 32]} />
+        <meshPhysicalMaterial
+          color={gemColor}
+          transparent
+          opacity={0.82}
+          roughness={0.02}
+          metalness={0.0}
+          clearcoat={1.0}
+          clearcoatRoughness={0.03}
+          ior={2.4}
+          thickness={stoneR * 0.5}
+        />
+      </mesh>
+    </group>
+  );
+}
+
+/** Parametric fallback earring — stud + pin + stone. */
+function FallbackEarring() {
+  const params = useProjectStore((s) => s.currentParams);
+  const customization = useProjectStore((s) => s.customization);
+  const metalColor = METAL_COLORS[customization.metal_type] ?? "#d4af37";
+  const gemColor = GEM_COLORS[customization.gemstone_material] ?? "#b9f2ff";
+
+  const ep = params.earring_params;
+  const studD = ep?.stud_diameter ?? 6;
+  const studT = ep?.stud_thickness ?? 1.5;
+  const pinL = ep?.pin_length ?? 10;
+  const pinD = ep?.pin_diameter ?? 0.8;
+
+  const stone = params.center_stone;
+  const stoneR = stone.diameter / 2;
+
+  return (
+    <group rotation={[-0.2, 0.15, 0]}>
+      {/* Stud base disc */}
+      <mesh>
+        <cylinderGeometry args={[studD / 2, studD / 2, studT, 48]} />
+        <meshStandardMaterial color={metalColor} metalness={0.92} roughness={0.12} />
+      </mesh>
+
+      {/* Back pin */}
+      <mesh position={[0, -(studT / 2 + pinL / 2), 0]}>
+        <cylinderGeometry args={[pinD * 0.3, pinD / 2, pinL, 12]} />
+        <meshStandardMaterial color={metalColor} metalness={0.92} roughness={0.12} />
+      </mesh>
+
+      {/* Center stone on front face */}
+      <mesh position={[0, studT / 2 + stoneR * 0.25, 0]}>
+        <sphereGeometry args={[stoneR * 0.65, 48, 32]} />
+        <meshPhysicalMaterial
+          color={gemColor}
+          transparent
+          opacity={0.82}
+          roughness={0.02}
+          metalness={0.0}
+          clearcoat={1.0}
+          clearcoatRoughness={0.03}
+          ior={2.4}
+          thickness={stoneR * 0.5}
+        />
+      </mesh>
     </group>
   );
 }

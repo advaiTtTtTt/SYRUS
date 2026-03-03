@@ -38,6 +38,7 @@ SHAPE_FACTORS: dict[str, float] = {
     "oval":    0.95,
     "emerald": 0.90,
     "pear":    0.92,
+    "cushion": 0.97,
 }
 
 # ── Downgrade hierarchies (budget-logic SKILL) ─────────────────────

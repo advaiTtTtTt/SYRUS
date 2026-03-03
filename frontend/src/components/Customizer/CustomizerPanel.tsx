@@ -1,34 +1,49 @@
 /**
  * Customizer panel — container for all parameter controls.
+ * Shows type-specific sliders based on the selected jewelry type.
  */
 
-import React from "react";
+import "./Customizer.css";
+import { useProjectStore } from "../../store/useProjectStore";
 import DimensionSliders from "./DimensionSliders";
+import EarringSliders from "./EarringSliders";
+import JewelryTypeSelector from "./JewelryTypeSelector";
 import MaterialSelect from "./MaterialSelect";
+import PendantSliders from "./PendantSliders";
 import SettingToggle from "./SettingToggle";
+import SideStoneControls from "./SideStoneControls";
 import StoneControls from "./StoneControls";
 
-const panelStyle: React.CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  gap: 20,
-  padding: 16,
-  background: "#111",
-  borderRadius: 12,
-  overflowY: "auto",
-  maxHeight: "100%",
+const TYPE_LABELS: Record<string, string> = {
+  ring: "Ring",
+  pendant: "Pendant",
+  earring: "Earring",
 };
 
 export default function CustomizerPanel() {
+  const jewelryType = useProjectStore((s) => s.currentParams.type) ?? "ring";
+
   return (
-    <div style={panelStyle}>
-      <h3 style={{ fontSize: 15, fontWeight: 600, color: "#fff" }}>
-        Customize Ring
-      </h3>
-      <DimensionSliders />
+    <div className="customizer-panel">
+      <h3>Customize {TYPE_LABELS[jewelryType] ?? "Jewelry"}</h3>
+
+      <JewelryTypeSelector />
+
+      {/* Type-specific dimension controls */}
+      {jewelryType === "ring" && <DimensionSliders />}
+      {jewelryType === "pendant" && <PendantSliders />}
+      {jewelryType === "earring" && <EarringSliders />}
+
       <StoneControls />
       <MaterialSelect />
-      <SettingToggle />
+
+      {/* Setting controls — only for rings */}
+      {jewelryType === "ring" && (
+        <>
+          <SettingToggle />
+          <SideStoneControls />
+        </>
+      )}
     </div>
   );
 }

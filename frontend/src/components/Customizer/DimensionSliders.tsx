@@ -2,28 +2,9 @@
  * Dimension sliders — ring_radius, band_width, band_thickness.
  */
 
-import React from "react";
+import "./Customizer.css";
 import { PARAM_LIMITS } from "../../types/jewelry";
 import { useProjectStore } from "../../store/useProjectStore";
-
-const sliderStyle: React.CSSProperties = {
-  width: "100%",
-  accentColor: "#a78bfa",
-};
-
-const rowStyle: React.CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  gap: 4,
-  marginBottom: 12,
-};
-
-const labelStyle: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "space-between",
-  fontSize: 12,
-  color: "#ccc",
-};
 
 interface SliderProps {
   label: string;
@@ -36,21 +17,24 @@ interface SliderProps {
 }
 
 function Slider({ label, value, min, max, step, unit = "mm", onChange }: SliderProps) {
+  const id = label.toLowerCase().replace(/\s+/g, "-");
   return (
-    <div style={rowStyle}>
-      <div style={labelStyle}>
-        <span>{label}</span>
+    <div className="slider-row">
+      <div className="label-row">
+        <label htmlFor={id}>{label}</label>
         <span>
           {value.toFixed(1)} {unit}
         </span>
       </div>
       <input
+        id={id}
         type="range"
-        style={sliderStyle}
+        className="range-slider"
         min={min}
         max={max}
         step={step}
         value={value}
+        aria-label={label}
         onChange={(e) => onChange(parseFloat(e.target.value))}
       />
     </div>
@@ -62,9 +46,7 @@ export default function DimensionSliders() {
 
   return (
     <div>
-      <h4 style={{ fontSize: 13, color: "#a78bfa", marginBottom: 12 }}>
-        Ring Dimensions
-      </h4>
+      <h4 className="section-heading">Ring Dimensions</h4>
       <Slider
         label="Ring Radius"
         value={currentParams.ring_radius}

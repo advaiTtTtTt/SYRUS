@@ -49,16 +49,34 @@ export interface ProjectState {
   setIsBuilding: (v: boolean) => void;
   setBuildError: (e: string | null) => void;
   replaceParams: (params: ParametricRing) => void;
+  setParseFailure: () => void;
   reset: () => void;
 }
 
 const DEFAULT_PARAMS: ParametricRing = {
+  type: "ring",
   ring_radius: 9.0,
   band_width: 2.2,
   band_thickness: 1.8,
   center_stone: { type: "round", diameter: 6.0, height: 3.6, prongs: 4 },
   setting_type: "prong",
+  setting_style: "solitaire",
   side_stones: [],
+  side_stone_layout: null,
+  pendant_params: {
+    base_shape: "circular",
+    base_width: 15.0,
+    base_height: 20.0,
+    base_thickness: 2.0,
+    bail_diameter: 5.0,
+    bail_thickness: 1.5,
+  },
+  earring_params: {
+    stud_diameter: 6.0,
+    stud_thickness: 1.5,
+    pin_length: 10.0,
+    pin_diameter: 0.8,
+  },
 };
 
 const DEFAULT_CUSTOM: Customization = {
@@ -121,6 +139,22 @@ export const useProjectStore = create<ProjectState>((set) => ({
   setBuildError: (e) => set({ buildError: e, isBuilding: false }),
 
   replaceParams: (params) => set({ currentParams: params }),
+
+  setParseFailure: () =>
+    set({
+      parseResult: {
+        params: { ...DEFAULT_PARAMS },
+        confidence_score: 0,
+        band_confidence: 0,
+        stone_confidence: 0,
+        setting_confidence: 0,
+        symmetry_confidence: 0,
+      },
+      currentParams: { ...DEFAULT_PARAMS },
+      customization: { ...DEFAULT_CUSTOM },
+      isParsing: false,
+      buildError: null,
+    }),
 
   reset: () =>
     set({

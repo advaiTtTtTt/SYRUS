@@ -1,9 +1,10 @@
 /**
  * Debounced build trigger hook.
  *
- * After any param change, waits 300ms then fires:
- *   - POST /api/build (geometry + validation)
- *   - POST /api/budget/estimate (cost) — in parallel
+ * Separates material-only changes from geometry changes:
+ *   - Geometry changes (currentParams) → full rebuild + budget estimate
+ *   - Material changes (metal/gem) → budget estimate only (shader swap is instant)
+ *   - Budget target change → budget adjustment (may alter params → full rebuild)
  *
  * Cancels in-flight requests on new changes (AbortController).
  */
@@ -26,11 +27,15 @@ export function useBuild() {
     setBuildError,
   } = useProjectStore();
 
+  // Track type to detect type changes
+  const prevTypeRef = useRef(currentParams.type);
+
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
   const abortRef = useRef<AbortController>();
+  const budgetTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
+  // Full geometry rebuild + budget estimate
   const triggerBuild = useCallback(() => {
-    // Cancel previous
     if (timerRef.current) clearTimeout(timerRef.current);
     if (abortRef.current) abortRef.current.abort();
 
@@ -39,7 +44,6 @@ export function useBuild() {
       abortRef.current = new AbortController();
 
       try {
-        // Fire build + budget estimate in parallel
         const [buildRes, budgetRes] = await Promise.all([
           buildRing(currentParams, customization, projectId ?? undefined),
           estimateCost(currentParams, customization),
@@ -59,13 +63,40 @@ export function useBuild() {
     }, DEBOUNCE_MS);
   }, [currentParams, customization, projectId, setIsBuilding, setBuildResult, setBudgetResult, setBuildError]);
 
-  // Auto-trigger on param/customization changes (including initial mount)
+  // Budget-only re-estimate (material swap — no geometry rebuild)
+  const triggerBudgetOnly = useCallback(() => {
+    if (budgetTimerRef.current) clearTimeout(budgetTimerRef.current);
+
+    budgetTimerRef.current = setTimeout(async () => {
+      try {
+        const budgetRes = await estimateCost(currentParams, customization);
+        setBudgetResult(budgetRes);
+      } catch {
+        // Budget estimate failure is non-fatal
+      }
+    }, DEBOUNCE_MS);
+  }, [currentParams, customization, setBudgetResult]);
+
+  // Trigger full rebuild when geometry params change
   useEffect(() => {
+    // If jewelry type changed, clear stale model so fallback renders immediately
+    if (prevTypeRef.current !== currentParams.type) {
+      prevTypeRef.current = currentParams.type;
+      useProjectStore.setState({ modelUrl: null });
+    }
     triggerBuild();
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [currentParams, customization]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [currentParams]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Material/gem changes → budget only (shaders update reactively in RingModel)
+  useEffect(() => {
+    triggerBudgetOnly();
+    return () => {
+      if (budgetTimerRef.current) clearTimeout(budgetTimerRef.current);
+    };
+  }, [customization.metal_type, customization.gemstone_material, customization.side_stone_material]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return { triggerBuild };
 }

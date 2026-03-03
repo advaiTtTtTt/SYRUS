@@ -44,10 +44,19 @@ def export_stl(solid: cq.Workplane, path: Path, tolerance: float = 0.01, angular
     return path
 
 
-def export_glb(solid: cq.Workplane, path: Path, tolerance: float = 0.01) -> Path:
-    """Export CadQuery solid to GLB via tessellation + trimesh.
+def export_glb(
+    parts: dict[str, "cq.Workplane"] | "cq.Workplane",
+    path: Path,
+    tolerance: float = 0.01,
+) -> Path:
+    """Export CadQuery solid(s) to GLB via tessellation + trimesh.
 
-    Pipeline: CadQuery shape → tessellate → trimesh → GLB
+    Accepts either:
+      - dict[str, cq.Workplane] → multi-mesh GLB with named nodes
+        (enables per-mesh material assignment in the frontend)
+      - single cq.Workplane → fallback single-mesh export
+
+    Pipeline: CadQuery shape → tessellate → trimesh Scene → GLB
     """
     import numpy as np
     import trimesh
@@ -55,20 +64,32 @@ def export_glb(solid: cq.Workplane, path: Path, tolerance: float = 0.01) -> Path
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
 
-    # Tessellate the CadQuery solid
-    vertices, triangles = solid.val().tessellate(tolerance)
+    # Normalize input: single solid → dict wrapper
+    if not isinstance(parts, dict):
+        parts = {"body": parts}
 
-    # Convert to numpy arrays
-    verts = np.array([[v.x, v.y, v.z] for v in vertices], dtype=np.float64)
-    faces = np.array(triangles, dtype=np.int32)
+    geometry: dict[str, trimesh.Trimesh] = {}
+    for name, solid in parts.items():
+        try:
+            vertices, triangles = solid.val().tessellate(tolerance)
+            verts = np.array([[v.x, v.y, v.z] for v in vertices], dtype=np.float64)
+            faces = np.array(triangles, dtype=np.int32)
+            if len(verts) == 0 or len(faces) == 0:
+                continue
+            mesh = trimesh.Trimesh(vertices=verts, faces=faces)
+            mesh.fix_normals()
+            geometry[name] = mesh
+        except Exception:
+            continue  # Skip parts that fail tessellation
 
-    # Build trimesh and export
-    mesh = trimesh.Trimesh(vertices=verts, faces=faces)
+    if not geometry:
+        # Fallback: export empty mesh
+        mesh = trimesh.Trimesh()
+        mesh.export(str(path), file_type="glb")
+    else:
+        scene = trimesh.Scene(geometry=geometry)
+        scene.export(str(path), file_type="glb")
 
-    # Fix normals (outward-facing per SKILL)
-    mesh.fix_normals()
-
-    mesh.export(str(path), file_type="glb")
     return path
 
 

@@ -2,34 +2,9 @@
  * Stone controls — diameter, prong count, shape.
  */
 
-import React from "react";
+import "./Customizer.css";
 import { PARAM_LIMITS, type StoneShape } from "../../types/jewelry";
 import { useProjectStore } from "../../store/useProjectStore";
-
-const selectStyle: React.CSSProperties = {
-  width: "100%",
-  padding: "6px 8px",
-  borderRadius: 6,
-  border: "1px solid #444",
-  background: "#1a1a1a",
-  color: "#e0e0e0",
-  fontSize: 12,
-  marginBottom: 12,
-};
-
-const sliderRow: React.CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  gap: 4,
-  marginBottom: 12,
-};
-
-const labelRow: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "space-between",
-  fontSize: 12,
-  color: "#ccc",
-};
 
 const SHAPES: { value: StoneShape; label: string }[] = [
   { value: "round", label: "Round" },
@@ -44,15 +19,15 @@ export default function StoneControls() {
 
   return (
     <div>
-      <h4 style={{ fontSize: 13, color: "#a78bfa", marginBottom: 12 }}>
-        Center Stone
-      </h4>
+      <h4 className="section-heading">Center Stone</h4>
 
       {/* Shape selector */}
-      <div style={{ marginBottom: 12 }}>
-        <label style={{ fontSize: 12, color: "#ccc" }}>Shape</label>
+      <div className="form-group">
+        <label htmlFor="shape-select" className="form-label">Shape</label>
         <select
-          style={selectStyle}
+          id="shape-select"
+          className="customizer-select"
+          title="Select stone shape"
           value={stone.type}
           onChange={(e) => updateStone({ type: e.target.value as StoneShape })}
         >
@@ -65,18 +40,20 @@ export default function StoneControls() {
       </div>
 
       {/* Diameter slider */}
-      <div style={sliderRow}>
-        <div style={labelRow}>
-          <span>Diameter</span>
+      <div className="slider-row">
+        <div className="label-row">
+          <label htmlFor="diameter-slider">Diameter</label>
           <span>{stone.diameter.toFixed(1)} mm</span>
         </div>
         <input
+          id="diameter-slider"
           type="range"
-          style={{ width: "100%", accentColor: "#a78bfa" }}
+          className="range-slider"
           min={PARAM_LIMITS.stone_diameter.min}
           max={PARAM_LIMITS.stone_diameter.max}
           step={PARAM_LIMITS.stone_diameter.step}
           value={stone.diameter}
+          aria-label="Stone diameter"
           onChange={(e) => {
             const dia = parseFloat(e.target.value);
             updateStone({ diameter: dia, height: +(dia * 0.6).toFixed(2) });
@@ -85,18 +62,20 @@ export default function StoneControls() {
       </div>
 
       {/* Prong count slider */}
-      <div style={sliderRow}>
-        <div style={labelRow}>
-          <span>Prongs</span>
+      <div className="slider-row">
+        <div className="label-row">
+          <label htmlFor="prong-slider">Prongs</label>
           <span>{stone.prongs}</span>
         </div>
         <input
+          id="prong-slider"
           type="range"
-          style={{ width: "100%", accentColor: "#a78bfa" }}
+          className="range-slider"
           min={PARAM_LIMITS.stone_prongs.min}
           max={PARAM_LIMITS.stone_prongs.max}
           step={PARAM_LIMITS.stone_prongs.step}
           value={stone.prongs}
+          aria-label="Number of prongs"
           onChange={(e) => updateStone({ prongs: parseInt(e.target.value) })}
         />
       </div>

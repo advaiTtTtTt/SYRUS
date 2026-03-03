@@ -50,7 +50,7 @@ async def build_ring(req: BuildRequest):
     build_id = str(uuid.uuid4())
 
     try:
-        from app.skills.parametric_engine.engine import build_ring as do_build
+        from app.skills.parametric_engine.engine import build_jewelry as do_build
 
         result = do_build(
             params=req.params,

@@ -5,11 +5,15 @@
 
 // ── Enums ──────────────────────────────────────────────────────
 
-export type StoneShape = "round" | "oval" | "emerald" | "pear";
+export type JewelryType = "ring" | "pendant" | "earring";
+export type StoneShape = "round" | "oval" | "emerald" | "pear" | "cushion";
 export type SettingType = "prong" | "bezel";
+export type SettingStyle = "solitaire" | "pave_shoulder" | "halo" | "cathedral";
+export type SideStonePattern = "pave" | "channel" | "halo";
 export type MetalType = "18k_gold" | "14k_gold" | "platinum" | "silver";
 export type GemstoneMaterial = "diamond" | "ruby" | "sapphire" | "emerald" | "moissanite";
 export type ManufacturingStatus = "SAFE" | "AUTO-CORRECTED" | "REJECTED";
+export type PendantBaseShape = "circular" | "oval";
 
 // ── Core parametric schema ─────────────────────────────────────
 
@@ -26,13 +30,42 @@ export interface SideStone {
   count: number;
 }
 
+export interface PendantParams {
+  base_shape: PendantBaseShape;
+  base_width: number;
+  base_height: number;
+  base_thickness: number;
+  bail_diameter: number;
+  bail_thickness: number;
+}
+
+export interface EarringParams {
+  stud_diameter: number;
+  stud_thickness: number;
+  pin_length: number;
+  pin_diameter: number;
+}
+
+export interface SideStoneLayout {
+  enabled: boolean;
+  pattern: SideStonePattern;
+  count: number;
+  diameter: number;
+  rows: number;
+}
+
 export interface ParametricRing {
+  type?: JewelryType;
   ring_radius: number;
   band_width: number;
   band_thickness: number;
   center_stone: CenterStone;
   setting_type: SettingType;
+  setting_style?: SettingStyle;
   side_stones: SideStone[];
+  side_stone_layout?: SideStoneLayout | null;
+  pendant_params?: PendantParams | null;
+  earring_params?: EarringParams | null;
 }
 
 // ── Customization layer ────────────────────────────────────────
@@ -104,4 +137,19 @@ export const PARAM_LIMITS = {
   band_thickness: { min: 1.5, max: 3.5, step: 0.1 },
   stone_diameter: { min: 3.0, max: 12.0, step: 0.1 },
   stone_prongs: { min: 3, max: 8, step: 1 },
+  // Pendant limits
+  pendant_base_width: { min: 8.0, max: 30.0, step: 0.5 },
+  pendant_base_height: { min: 8.0, max: 40.0, step: 0.5 },
+  pendant_base_thickness: { min: 1.0, max: 4.0, step: 0.1 },
+  pendant_bail_diameter: { min: 3.0, max: 8.0, step: 0.5 },
+  pendant_bail_thickness: { min: 1.0, max: 3.0, step: 0.1 },
+  // Earring limits
+  earring_stud_diameter: { min: 4.0, max: 12.0, step: 0.5 },
+  earring_stud_thickness: { min: 1.0, max: 3.0, step: 0.1 },
+  earring_pin_length: { min: 8.0, max: 14.0, step: 0.5 },
+  earring_pin_diameter: { min: 0.6, max: 1.2, step: 0.1 },
+  // Side stone layout limits
+  ssl_count: { min: 0, max: 60, step: 1 },
+  ssl_diameter: { min: 1.0, max: 4.0, step: 0.1 },
+  ssl_rows: { min: 1, max: 3, step: 1 },
 } as const;

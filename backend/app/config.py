@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     # ── Server ─────────────────────────────────────────────────────
     HOST: str = "0.0.0.0"
     PORT: int = 8000
-    CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:3000"]
+    CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:5174", "http://localhost:3000"]
 
     # ── Defaults (mm) ──────────────────────────────────────────────
     DEFAULT_RING_RADIUS: float = 9.0
@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     STL_ANGULAR_TOLERANCE: float = 0.1  # degrees
 
     # ── Feature Flags ──────────────────────────────────────────────
-    ENABLE_SIDE_STONES: bool = False  # Phase 2
+    ENABLE_SIDE_STONES: bool = True
     ENABLE_BEZEL_SETTING: bool = False  # Phase 2
 
     model_config = {"env_prefix": "SYRUS_", "env_file": ".env"}
